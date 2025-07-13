@@ -71,7 +71,7 @@ class NewResumeAnalysisService:
 
             # Step 3: Validate and normalize data to prevent type errors
             structured_data = self._validate_and_normalize_data(structured_data)
-            
+
             # Log final structured data for debugging
             logger.info("=== FINAL STRUCTURED DATA ===")
             logger.info(json.dumps(structured_data, indent=2, ensure_ascii=False))

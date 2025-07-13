@@ -110,7 +110,7 @@ class ResumeScoringEngine:
         print(f"DEBUG: Skills input: {skills}")
         print(f"DEBUG: Skills type: {type(skills)}")
         print(f"DEBUG: Skills length: {len(skills) if skills else 0}")
-        
+
         if not skills:
             print("DEBUG: No skills found, returning 0")
             return 0
@@ -120,20 +120,22 @@ class ResumeScoringEngine:
         for skill in skills:
             if isinstance(skill, dict):
                 # Extract skill name from dict
-                skill_name = skill.get('name') or skill.get('skill') or str(skill)
+                skill_name = skill.get("name") or skill.get("skill") or str(skill)
                 processed_skills.append(skill_name)
             elif isinstance(skill, str):
                 processed_skills.append(skill)
             else:
                 processed_skills.append(str(skill))
-        
+
         print(f"DEBUG: Processed skills: {processed_skills}")
-        
+
         skills_lower = [
-            skill.lower() for skill in processed_skills if skill and isinstance(skill, str)
+            skill.lower()
+            for skill in processed_skills
+            if skill and isinstance(skill, str)
         ]
         print(f"DEBUG: Skills lower: {skills_lower}")
-        
+
         technical_matches = sum(
             1
             for skill in skills_lower
@@ -156,7 +158,9 @@ class ResumeScoringEngine:
         soft_bonus = min(soft_matches * 5, 20)
 
         total_score = min(base_score + technical_bonus + soft_bonus, 100)
-        print(f"DEBUG: Base score: {base_score}, Technical bonus: {technical_bonus}, Soft bonus: {soft_bonus}, Total: {total_score}")
+        print(
+            f"DEBUG: Base score: {base_score}, Technical bonus: {technical_bonus}, Soft bonus: {soft_bonus}, Total: {total_score}"
+        )
 
         return total_score
 

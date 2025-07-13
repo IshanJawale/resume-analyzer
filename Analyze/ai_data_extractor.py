@@ -75,18 +75,18 @@ Important:
             # Parse JSON
             try:
                 raw_data = json.loads(json_output_string)
-                
+
                 # Log the raw AI response for debugging
                 logger.info("=== RAW AI RESPONSE ===")
                 logger.info(json.dumps(raw_data, indent=2, ensure_ascii=False))
-                
+
                 # Map the keys to match our database fields
                 structured_data = self._map_groq_response(raw_data)
-                
+
                 # Log the mapped data for debugging
                 logger.info("=== MAPPED DATA ===")
                 logger.info(json.dumps(structured_data, indent=2, ensure_ascii=False))
-                
+
                 return structured_data
             except json.JSONDecodeError as e:
                 logger.error(f"JSON parsing error: {e}")
@@ -122,11 +122,7 @@ Important:
             if groq_key in raw_data:
                 value = raw_data[groq_key]
                 # Fields that should preserve structure (dictionaries/objects)
-                structured_fields = [
-                    "education_details",
-                    "work_experience", 
-                    "projects"
-                ]
+                structured_fields = ["education_details", "work_experience", "projects"]
                 # Fields that should be lists of strings
                 list_string_fields = [
                     "skills",
@@ -135,7 +131,7 @@ Important:
                     "hobbies_interests",
                     "achievements",
                 ]
-                
+
                 if db_key in structured_fields:
                     # Preserve structure for complex fields
                     mapped_data[db_key] = self._normalize_list_field(value)
@@ -145,7 +141,9 @@ Important:
                         normalized = []
                         for item in value:
                             if isinstance(item, dict):
-                                extracted_text = self._extract_meaningful_text_from_dict(item)
+                                extracted_text = (
+                                    self._extract_meaningful_text_from_dict(item)
+                                )
                                 if extracted_text:
                                     normalized.append(extracted_text)
                             elif isinstance(item, str) and item.strip():
@@ -229,34 +227,56 @@ Important:
         """
         # Priority fields for different types of data
         priority_fields = [
-            "name", "title", "project_name", "project_title",
-            "job_title", "position", "role", "company", "organization",
-            "degree", "certification", "skill", "technology",
-            "description", "summary", "details"
+            "name",
+            "title",
+            "project_name",
+            "project_title",
+            "job_title",
+            "position",
+            "role",
+            "company",
+            "organization",
+            "degree",
+            "certification",
+            "skill",
+            "technology",
+            "description",
+            "summary",
+            "details",
         ]
-        
+
         # First, try to find priority fields
         for field in priority_fields:
             if field in item_dict and item_dict[field]:
                 value = str(item_dict[field]).strip()
                 if value:
                     # Add additional context if available
-                    context_fields = ["company", "organization", "technologies", "duration", "year"]
+                    context_fields = [
+                        "company",
+                        "organization",
+                        "technologies",
+                        "duration",
+                        "year",
+                    ]
                     context = []
                     for ctx_field in context_fields:
-                        if ctx_field in item_dict and item_dict[ctx_field] and ctx_field != field:
+                        if (
+                            ctx_field in item_dict
+                            and item_dict[ctx_field]
+                            and ctx_field != field
+                        ):
                             context.append(str(item_dict[ctx_field]))
-                    
+
                     if context:
                         return f"{value} ({', '.join(context)})"
                     return value
-        
+
         # If no priority fields found, join all non-empty string values
         all_values = []
         for key, value in item_dict.items():
             if value and isinstance(value, (str, int, float)):
                 text = str(value).strip()
-                if text and text.lower() not in ['none', 'null', 'undefined']:
+                if text and text.lower() not in ["none", "null", "undefined"]:
                     all_values.append(text)
-        
+
         return " - ".join(all_values) if all_values else ""
