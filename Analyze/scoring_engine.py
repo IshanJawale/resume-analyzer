@@ -110,7 +110,7 @@ class ResumeScoringEngine:
         if not skills:
             return 0
 
-        skills_lower = [skill.lower() for skill in skills if skill]
+        skills_lower = [skill.lower() for skill in skills if skill and isinstance(skill, str)]
         technical_matches = sum(
             1
             for skill in skills_lower

@@ -113,7 +113,7 @@ class RecommendationsGenerator:
             )
 
         # Check for trending skills
-        current_skills_lower = [skill.lower() for skill in skills]
+        current_skills_lower = [skill.lower() for skill in skills if isinstance(skill, str)]
         missing_trending = []
 
         for category, trending in self.trending_skills.items():
@@ -136,7 +136,7 @@ class RecommendationsGenerator:
             "problem solving",
             "project management",
         ]
-        has_soft_skills = any(soft in " ".join(skills).lower() for soft in soft_skills)
+        has_soft_skills = any(soft in " ".join(str(skill) for skill in skills if skill).lower() for soft in soft_skills)
 
         if not has_soft_skills:
             recommendations.append(
@@ -262,7 +262,7 @@ class RecommendationsGenerator:
 
         # Suggest specific certifications based on skills
         skills = structured_data.get("skills", [])
-        skills_text = " ".join(skills).lower()
+        skills_text = " ".join(str(skill) for skill in skills if skill).lower()
 
         cert_suggestions = []
         if any(aws_skill in skills_text for aws_skill in ["aws", "cloud", "amazon"]):

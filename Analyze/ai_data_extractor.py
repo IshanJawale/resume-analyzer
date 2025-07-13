@@ -7,7 +7,7 @@ Uses Groq API to extract structured data from resume text.
 import json
 import logging
 import os
-from typing import Dict
+from typing import Dict, List
 
 import dotenv
 from groq import Groq
@@ -113,14 +113,9 @@ Return the extracted information in JSON format with appropriate keys. The outpu
                     "hobbies_interests",
                     "achievements",
                 ]:
-                    if value is None:
-                        mapped_data[db_key] = []
-                    elif isinstance(value, list):
-                        mapped_data[db_key] = value
-                    else:
-                        mapped_data[db_key] = [value] if value else []
+                    mapped_data[db_key] = self._normalize_list_field(value)
                 else:
-                    mapped_data[db_key] = value if value is not None else ""
+                    mapped_data[db_key] = str(value) if value is not None else ""
             else:
                 # Provide default values for missing fields
                 if db_key in [
@@ -137,27 +132,6 @@ Return the extracted information in JSON format with appropriate keys. The outpu
                 else:
                     mapped_data[db_key] = ""
 
-        # Handle skills if it's a dictionary (convert to list)
-        if "skills" in mapped_data and isinstance(mapped_data["skills"], dict):
-            # Flatten skills dictionary into a single list
-            all_skills = []
-            for category, skill_list in mapped_data["skills"].items():
-                if isinstance(skill_list, list):
-                    all_skills.extend(skill_list)
-                elif isinstance(skill_list, str):
-                    all_skills.append(skill_list)
-            mapped_data["skills"] = all_skills
-
-        # Ensure work_experience is a list
-        if "work_experience" in mapped_data and not isinstance(
-            mapped_data["work_experience"], list
-        ):
-            mapped_data["work_experience"] = (
-                [mapped_data["work_experience"]]
-                if mapped_data["work_experience"]
-                else []
-            )
-
         return mapped_data
 
     def _clean_json_output(self, json_string: str) -> str:
@@ -169,3 +143,46 @@ Return the extracted information in JSON format with appropriate keys. The outpu
         # Remove extra whitespace
         json_string = json_string.strip()
         return json_string
+
+    def _normalize_list_field(self, value) -> List:
+        """
+        Normalize a field to ensure it's a proper list of strings
+        """
+        if value is None:
+            return []
+
+        if isinstance(value, list):
+            # Flatten any nested structures and convert to strings
+            normalized = []
+            for item in value:
+                if isinstance(item, dict):
+                    # If it's a dict, try to extract meaningful text
+                    if "name" in item:
+                        normalized.append(str(item["name"]))
+                    elif "title" in item:
+                        normalized.append(str(item["title"]))
+                    else:
+                        # Join all string values from the dict
+                        normalized.append(
+                            " ".join(str(v) for v in item.values() if v)
+                        )
+                elif isinstance(item, str):
+                    normalized.append(item)
+                else:
+                    normalized.append(str(item))
+            return normalized
+
+        if isinstance(value, dict):
+            # If it's a dict, extract all string values
+            all_values = []
+            for v in value.values():
+                if isinstance(v, list):
+                    all_values.extend(str(item) for item in v if item)
+                elif v:
+                    all_values.append(str(v))
+            return all_values
+
+        if isinstance(value, str):
+            return [value] if value else []
+
+        return [str(value)] if value else []
