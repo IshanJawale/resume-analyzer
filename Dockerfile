@@ -12,11 +12,12 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-# Create staticfiles directory and collect static files
+# Create staticfiles directory and copy startup script
 RUN mkdir -p /app/staticfiles
-RUN python manage.py collectstatic --noinput --settings=a_core.settings
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
 EXPOSE 8000
 
-# Use Gunicorn for production
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "a_core.wsgi:application"]
+# Use startup script that collects static files then starts Gunicorn
+CMD ["/app/start.sh"]
