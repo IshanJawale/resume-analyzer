@@ -107,12 +107,7 @@ class ResumeScoringEngine:
         """
         Calculate score based on skills quality and quantity
         """
-        print(f"DEBUG: Skills input: {skills}")
-        print(f"DEBUG: Skills type: {type(skills)}")
-        print(f"DEBUG: Skills length: {len(skills) if skills else 0}")
-
         if not skills:
-            print("DEBUG: No skills found, returning 0")
             return 0
 
         # Handle both list of strings and list of dicts
@@ -127,14 +122,11 @@ class ResumeScoringEngine:
             else:
                 processed_skills.append(str(skill))
 
-        print(f"DEBUG: Processed skills: {processed_skills}")
-
         skills_lower = [
             skill.lower()
             for skill in processed_skills
             if skill and isinstance(skill, str)
         ]
-        print(f"DEBUG: Skills lower: {skills_lower}")
 
         technical_matches = sum(
             1
@@ -147,21 +139,14 @@ class ResumeScoringEngine:
             if any(soft in skill for soft in self.HIGH_VALUE_SKILLS["soft"])
         )
 
-        print(f"DEBUG: Technical matches: {technical_matches}")
-        print(f"DEBUG: Soft matches: {soft_matches}")
-
-        # Base score for having skills
-        base_score = min(len(processed_skills) * 2, 40)
+        # Base score for having skills (more generous scoring)
+        base_score = min(len(processed_skills) * 3, 50)  # Increased from 2 to 3
 
         # Bonus for high-value skills
         technical_bonus = min(technical_matches * 8, 40)
         soft_bonus = min(soft_matches * 5, 20)
 
         total_score = min(base_score + technical_bonus + soft_bonus, 100)
-        print(
-            f"DEBUG: Base score: {base_score}, Technical bonus: {technical_bonus}, Soft bonus: {soft_bonus}, Total: {total_score}"
-        )
-
         return total_score
 
     def _calculate_experience_score(self, work_experience: List) -> int:

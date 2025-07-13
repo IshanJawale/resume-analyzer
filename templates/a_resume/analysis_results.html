@@ -239,9 +239,9 @@
                                 <div class="list-item">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
-                                            <h6 class="fw-bold mb-1">{{ experience.job_title|default:"Position" }}</h6>
-                                            <p class="text-muted mb-1">{{ experience.company|default:"Company" }}</p>
-                                            <small class="text-muted">{{ experience.duration|default:"Duration not specified" }}</small>
+                                            <h6 class="fw-bold mb-1">{{ experience|experience_position }}</h6>
+                                            <p class="text-muted mb-1">{{ experience|experience_company }}</p>
+                                            <small class="text-muted">{{ experience|experience_duration }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -266,9 +266,9 @@
                         {% if analysis.education_details %}
                             {% for education in analysis.education_details %}
                                 <div class="list-item">
-                                    <h6 class="fw-bold mb-1">{{ education.degree|default:"Degree" }}</h6>
-                                    <p class="text-muted mb-1">{{ education.institution|default:"Institution" }}</p>
-                                    <small class="text-muted">{{ education.year|default:"Year not specified" }}</small>
+                                    <h6 class="fw-bold mb-1">{{ education|education_degree }}</h6>
+                                    <p class="text-muted mb-1">{{ education|education_institution }}</p>
+                                    <small class="text-muted">{{ education|education_year }}</small>
                                 </div>
                             {% endfor %}
                         {% else %}
