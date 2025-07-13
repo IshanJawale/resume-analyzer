@@ -12,6 +12,10 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+# Create staticfiles directory and collect static files
+RUN mkdir -p /app/staticfiles
+RUN python manage.py collectstatic --noinput --settings=a_core.settings
+
 EXPOSE 8000
 
 # Use Gunicorn for production
