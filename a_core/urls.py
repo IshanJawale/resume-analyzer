@@ -24,7 +24,6 @@ urlpatterns = [
     path('', include('a_resume.urls')),
 ]
 
-# Serve media files in development
+# Serve static files in development (media files handled by Cloudinary)
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -27,7 +27,9 @@ def upload_resume_to_cloudinary(file, user_id, filename):
             public_id=os.path.splitext(filename)[0],
             use_filename=True,
             unique_filename=True,
-            resource_type="auto"  # Auto-detect file type
+            resource_type="raw",  # Use raw for PDFs and documents
+            type="upload",  # Make files publicly accessible
+            access_mode="public"  # Ensure public access
         )
         
         return result

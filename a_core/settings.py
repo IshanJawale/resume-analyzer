@@ -43,13 +43,13 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage',
     'cloudinary',
     'a_resume',
 ]
@@ -149,9 +149,7 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files (uploaded files)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Media files - Using Cloudinary for file storage, no local media needed
 
 # Login/Logout URLs
 LOGIN_URL = 'login'
@@ -161,11 +159,6 @@ LOGOUT_REDIRECT_URL = 'home'
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Cloudinary Configuration
 import cloudinary
@@ -179,11 +172,37 @@ cloudinary.config(
     secure=True
 )
 
+# Alternative configuration using CLOUDINARY_URL if available
+if os.getenv('CLOUDINARY_URL'):
+    import cloudinary
+    cloudinary.config()
+
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', ''),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY', ''),
     'API_SECRET': os.getenv('CLOUDINARY_SECRET', ''),
+    'OPTIONS': {
+        'resource_type': 'raw',
+        'type': 'upload',
+        'access_mode': 'public',
+        'delivery_type': 'upload'  # Explicit delivery type for public access
+    }
 }
 
-# Use Cloudinary for media storage
+# Use Cloudinary for media storage (Django 4.2+ format)
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# Fallback for older Django versions
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

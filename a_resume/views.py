@@ -15,6 +15,7 @@ import json
 import os
 import sys
 import tempfile
+import requests
 from .models import ResumeAnalysis, UserProfile, AnalysisRecommendation
 from .forms import ResumeUploadForm, UserProfileForm, CustomUserCreationForm
 
@@ -415,10 +416,15 @@ def delete_analysis(request, analysis_id):
     analysis = get_object_or_404(ResumeAnalysis, id=analysis_id, user=request.user)
     
     if request.method == 'POST':
-        # Delete the file
+        # Delete the file from Cloudinary storage
         if analysis.file:
-            if os.path.exists(analysis.file.path):
-                os.remove(analysis.file.path)
+            try:
+                # For Cloudinary storage, use the storage backend's delete method
+                analysis.file.storage.delete(analysis.file.name)
+                print(f"Successfully deleted file from Cloudinary: {analysis.file.name}")
+            except Exception as delete_error:
+                print(f"Warning: Could not delete file from Cloudinary: {delete_error}")
+                # Continue with analysis deletion even if file deletion fails
         
         analysis.delete()
         messages.success(request, 'Analysis deleted successfully!')
@@ -435,98 +441,127 @@ def perform_ai_analysis(resume_analysis):
         # Fallback to mock analysis if service is not available
         perform_mock_analysis(resume_analysis)
         return
-    
+
     try:
-        # Get the uploaded file path
-        file_path = resume_analysis.file.path
+        import tempfile
         
-        # Use the new analysis service
-        result = analysis_service.extract_and_analyze_resume(file_path)
-        
-        if not result['success']:
-            raise Exception(f"Analysis failed: {result.get('error', 'Unknown error')}")
-        
-        # Update resume analysis with extracted data
-        resume_analysis.status = 'completed'
-        resume_analysis.resume_text = result['resume_text']
-        resume_analysis.word_count = result['word_count']
-        
-        # Store extracted structured data with safe defaults
-        extracted_data = result['extracted_data']
-        resume_analysis.full_name = extracted_data.get('full_name', '') or ''
-        resume_analysis.email_address = extracted_data.get('email_address', '') or ''
-        resume_analysis.phone_number = extracted_data.get('phone_number', '') or ''
-        
-        # Ensure all JSON fields are lists, never None
-        resume_analysis.education_details = extracted_data.get('education_details') or []
-        resume_analysis.work_experience = extracted_data.get('work_experience') or []
-        
-        # Handle skills - if it's a dict, flatten it to a list
-        skills_data = extracted_data.get('skills') or []
-        if isinstance(skills_data, dict):
-            # Flatten skills dictionary into a single list
-            flattened_skills = []
-            for category, skill_list in skills_data.items():
-                if isinstance(skill_list, list):
-                    flattened_skills.extend(skill_list)
-                elif isinstance(skill_list, str):
-                    flattened_skills.append(skill_list)
-            resume_analysis.skills = flattened_skills
-        elif isinstance(skills_data, str):
-            # If it's a string representation of a dict, try to parse it
-            try:
-                import ast
-                parsed_skills = ast.literal_eval(skills_data)
-                if isinstance(parsed_skills, dict):
-                    flattened_skills = []
-                    for category, skill_list in parsed_skills.items():
-                        if isinstance(skill_list, list):
-                            flattened_skills.extend(skill_list)
-                        elif isinstance(skill_list, str):
-                            flattened_skills.append(skill_list)
-                    resume_analysis.skills = flattened_skills
-                else:
-                    resume_analysis.skills = skills_data if isinstance(skills_data, list) else [skills_data]
-            except:
-                # If parsing fails, treat as single skill or split by commas
-                resume_analysis.skills = [skills_data] if skills_data else []
-        else:
-            resume_analysis.skills = skills_data
+        # For Cloudinary storage, use Django's storage backend read method
+        try:
+            print(f"Reading file using Django storage: {resume_analysis.file.name}")
             
-        resume_analysis.certifications = extracted_data.get('certifications') or []
-        resume_analysis.projects = extracted_data.get('projects') or []
-        resume_analysis.languages_spoken = extracted_data.get('languages_spoken') or []
-        resume_analysis.hobbies_interests = extracted_data.get('hobbies_interests') or []
-        resume_analysis.achievements = extracted_data.get('achievements') or []
+            # Open the file using Django storage backend
+            with resume_analysis.file.open('rb') as cloudinary_file:
+                file_content = cloudinary_file.read()
+            
+            print(f"✅ Successfully read {len(file_content)} bytes from Cloudinary")
+            
+            # Create temporary file with same extension
+            file_extension = os.path.splitext(resume_analysis.filename)[1]
+            with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+                print(f"Saved to temporary file: {temp_file_path}")
+                
+        except Exception as storage_error:
+            print(f"Django storage read failed: {storage_error}")
+            # If that fails, there might be a fundamental issue with the storage configuration
+            raise Exception(f"Could not read file from Cloudinary storage: {storage_error}")
         
-        # Store analysis results
-        analysis = result['analysis']
-        scores = analysis['scores']
-        resume_analysis.overall_score = scores.get('overall_score', 0)
-        resume_analysis.skill_score = scores.get('skill_score', 0)
-        resume_analysis.experience_score = scores.get('experience_score', 0)
-        resume_analysis.education_score = scores.get('education_score', 0)
-        resume_analysis.ats_score = scores.get('contact_score', 0)  # Using contact score as ATS score
-        resume_analysis.job_match_score = scores.get('project_score', 0)  # Using project score as job match
-        
-        # Store analysis details with safe defaults
-        resume_analysis.summary = analysis.get('summary') or {}
-        resume_analysis.strengths = analysis.get('strengths') or []
-        resume_analysis.weaknesses = analysis.get('weaknesses') or []
-        resume_analysis.recommendations = analysis.get('recommendations') or []
-        
-        resume_analysis.save()
-        
-        # Save detailed recommendations
-        for rec_data in analysis['recommendations']:
-            AnalysisRecommendation.objects.create(
-                analysis=resume_analysis,
-                category=rec_data.get('category', 'General'),
-                priority=rec_data.get('priority', 'medium'),
-                title=rec_data.get('title', 'Recommendation'),
-                description=rec_data.get('description', ''),
-                action_items=rec_data.get('action_items', [])
-            )
+        try:
+            # Use the new analysis service with temporary file
+            result = analysis_service.extract_and_analyze_resume(temp_file_path)
+            
+            if not result['success']:
+                raise Exception(f"Analysis failed: {result.get('error', 'Unknown error')}")
+            
+            # Update resume analysis with extracted data
+            resume_analysis.status = 'completed'
+            resume_analysis.resume_text = result['resume_text']
+            resume_analysis.word_count = result['word_count']
+            
+            # Store extracted structured data with safe defaults
+            extracted_data = result['extracted_data']
+            resume_analysis.full_name = extracted_data.get('full_name', '') or ''
+            resume_analysis.email_address = extracted_data.get('email_address', '') or ''
+            resume_analysis.phone_number = extracted_data.get('phone_number', '') or ''
+            
+            # Ensure all JSON fields are lists, never None
+            resume_analysis.education_details = extracted_data.get('education_details') or []
+            resume_analysis.work_experience = extracted_data.get('work_experience') or []
+            
+            # Handle skills - if it's a dict, flatten it to a list
+            skills_data = extracted_data.get('skills') or []
+            if isinstance(skills_data, dict):
+                # Flatten skills dictionary into a single list
+                flattened_skills = []
+                for category, skill_list in skills_data.items():
+                    if isinstance(skill_list, list):
+                        flattened_skills.extend(skill_list)
+                    elif isinstance(skill_list, str):
+                        flattened_skills.append(skill_list)
+                resume_analysis.skills = flattened_skills
+            elif isinstance(skills_data, str):
+                # If it's a string representation of a dict, try to parse it
+                try:
+                    import ast
+                    parsed_skills = ast.literal_eval(skills_data)
+                    if isinstance(parsed_skills, dict):
+                        flattened_skills = []
+                        for category, skill_list in parsed_skills.items():
+                            if isinstance(skill_list, list):
+                                flattened_skills.extend(skill_list)
+                            elif isinstance(skill_list, str):
+                                flattened_skills.append(skill_list)
+                        resume_analysis.skills = flattened_skills
+                    else:
+                        resume_analysis.skills = skills_data if isinstance(skills_data, list) else [skills_data]
+                except:
+                    # If parsing fails, treat as single skill or split by commas
+                    resume_analysis.skills = [skills_data] if skills_data else []
+            else:
+                resume_analysis.skills = skills_data
+                
+            resume_analysis.certifications = extracted_data.get('certifications') or []
+            resume_analysis.projects = extracted_data.get('projects') or []
+            resume_analysis.languages_spoken = extracted_data.get('languages_spoken') or []
+            resume_analysis.hobbies_interests = extracted_data.get('hobbies_interests') or []
+            resume_analysis.achievements = extracted_data.get('achievements') or []
+            
+            # Store analysis results
+            analysis = result['analysis']
+            scores = analysis['scores']
+            resume_analysis.overall_score = scores.get('overall_score', 0)
+            resume_analysis.skill_score = scores.get('skill_score', 0)
+            resume_analysis.experience_score = scores.get('experience_score', 0)
+            resume_analysis.education_score = scores.get('education_score', 0)
+            resume_analysis.ats_score = scores.get('contact_score', 0)  # Using contact score as ATS score
+            resume_analysis.job_match_score = scores.get('project_score', 0)  # Using project score as job match
+            
+            # Store analysis details with safe defaults
+            resume_analysis.summary = analysis.get('summary') or {}
+            resume_analysis.strengths = analysis.get('strengths') or []
+            resume_analysis.weaknesses = analysis.get('weaknesses') or []
+            resume_analysis.recommendations = analysis.get('recommendations') or []
+            
+            resume_analysis.save()
+            
+            # Save detailed recommendations
+            for rec_data in analysis['recommendations']:
+                AnalysisRecommendation.objects.create(
+                    analysis=resume_analysis,
+                    category=rec_data.get('category', 'General'),
+                    priority=rec_data.get('priority', 'medium'),
+                    title=rec_data.get('title', 'Recommendation'),
+                    description=rec_data.get('description', ''),
+                    action_items=rec_data.get('action_items', [])
+                )
+                
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(temp_file_path)
+            except OSError:
+                pass  # File might already be deleted
         
     except Exception as e:
         # Handle errors

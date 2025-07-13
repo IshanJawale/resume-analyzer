@@ -5,7 +5,7 @@ import os
 
 def resume_upload_path(instance, filename):
     """Generate upload path for resume files"""
-    return f'media/resumes/{instance.user.id}/{filename}'
+    return f'resumes/{instance.user.id}/{filename}'
 
 class ResumeAnalysis(models.Model):
     ANALYSIS_STATUS_CHOICES = [
