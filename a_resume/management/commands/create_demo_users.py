@@ -3,6 +3,10 @@ from django.core.management.base import BaseCommand
 
 from a_resume.models import UserProfile
 
+# Demo user credentials
+DEMO_PASSWORD = "demo123"  # nosec B105
+TEST_PASSWORD = "testpass123"  # nosec B105
+
 
 class Command(BaseCommand):
     help = "Create demo users for testing"
@@ -12,7 +16,7 @@ class Command(BaseCommand):
         if not User.objects.filter(username="demo").exists():
             demo_user = User.objects.create_user(
                 username="demo",
-                password="demo123",
+                password=DEMO_PASSWORD,
                 email="demo@example.com",
                 first_name="Demo",
                 last_name="User",
@@ -30,7 +34,7 @@ class Command(BaseCommand):
         if not User.objects.filter(username="testuser").exists():
             test_user = User.objects.create_user(
                 username="testuser",
-                password="testpass123",
+                password=TEST_PASSWORD,
                 email="test@example.com",
                 first_name="Test",
                 last_name="User",

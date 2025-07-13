@@ -4,6 +4,9 @@ from django.urls import reverse
 
 from a_resume.models import UserProfile
 
+# Test constants
+TEST_PASSWORD = "testpass123"  # nosec B105
+
 
 class RegistrationTestCase(TestCase):
     def setUp(self):
@@ -22,8 +25,8 @@ class RegistrationTestCase(TestCase):
             "first_name": "Test",
             "last_name": "User",
             "email": "test@example.com",
-            "password1": "testpass123",
-            "password2": "testpass123",
+            "password1": TEST_PASSWORD,
+            "password2": TEST_PASSWORD,
             "terms": "on",
         }
 
@@ -43,12 +46,12 @@ class RegistrationTestCase(TestCase):
         """Test that user can login after registration"""
         # First register a user
         User.objects.create_user(
-            username="testuser2", password="testpass123", email="test2@example.com"
+            username="testuser2", password=TEST_PASSWORD, email="test2@example.com"
         )
 
         # Try to login
         response = self.client.post(
-            reverse("login"), {"username": "testuser2", "password": "testpass123"}
+            reverse("login"), {"username": "testuser2", "password": TEST_PASSWORD}
         )
 
         # Should redirect to dashboard
