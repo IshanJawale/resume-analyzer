@@ -5,19 +5,19 @@ This service provides complete resume analysis including text extraction,
 structured data extraction using AI, and comprehensive scoring.
 """
 
-import sys
-import os
 import json
 import logging
-from typing import Dict, List, Optional
-from pathlib import Path
+import os
+import sys
 from datetime import datetime
-import dotenv
+from pathlib import Path
+from typing import Dict, List, Optional
 
-from groq import Groq
+import dotenv
 
 # PDF processing imports
 import pdfplumber
+from groq import Groq
 
 try:
     import pytesseract

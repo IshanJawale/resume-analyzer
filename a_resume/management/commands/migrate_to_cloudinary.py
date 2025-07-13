@@ -1,8 +1,10 @@
-from django.core.management.base import BaseCommand
-from django.core.files.storage import default_storage
-from a_resume.models import ResumeAnalysis
 import os
+
 import cloudinary.uploader
+from django.core.files.storage import default_storage
+from django.core.management.base import BaseCommand
+
+from a_resume.models import ResumeAnalysis
 
 
 class Command(BaseCommand):

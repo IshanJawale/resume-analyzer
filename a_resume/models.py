@@ -1,7 +1,8 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
 import os
+
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
 
 
 def resume_upload_path(instance, filename):

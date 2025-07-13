@@ -2,10 +2,11 @@
 Cloudinary utilities for handling file operations
 """
 
-import cloudinary.uploader
-import cloudinary.api
-from django.conf import settings
 import os
+
+import cloudinary.api
+import cloudinary.uploader
+from django.conf import settings
 
 
 def upload_resume_to_cloudinary(file, user_id, filename):

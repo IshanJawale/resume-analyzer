@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import ResumeAnalysis, UserProfile, AnalysisRecommendation
+
+from .models import AnalysisRecommendation, ResumeAnalysis, UserProfile
 
 
 @admin.register(ResumeAnalysis)

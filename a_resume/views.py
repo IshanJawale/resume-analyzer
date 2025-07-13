@@ -1,23 +1,24 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse, HttpResponse
-from django.core.paginator import Paginator
-from django.db.models import Q, Avg, Max, Count
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 import json
 import os
 import sys
 import tempfile
+
 import requests
-from .models import ResumeAnalysis, UserProfile, AnalysisRecommendation
-from .forms import ResumeUploadForm, UserProfileForm, CustomUserCreationForm
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.db.models import Avg, Count, Max, Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
+from .forms import CustomUserCreationForm, ResumeUploadForm, UserProfileForm
+from .models import AnalysisRecommendation, ResumeAnalysis, UserProfile
 
 # Add Analyze directory to Python path for compatibility
 sys.path.append(
@@ -217,8 +218,8 @@ def analysis_results(request, analysis_id):
 
     # Format skills for template compatibility
     if analysis.skills:
-        import json
         import ast
+        import json
 
         skills_data = analysis.skills
         formatted_skills = []
