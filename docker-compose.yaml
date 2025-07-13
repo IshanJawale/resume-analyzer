@@ -9,7 +9,6 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - media_files:/app/media
       - static_files:/app/staticfiles
     env_file:
       - .env
@@ -38,5 +37,4 @@ services:
 
 volumes:
   postgres_data:
-  media_files:
   static_files:

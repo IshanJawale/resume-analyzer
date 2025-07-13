@@ -12,19 +12,30 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    load_dotenv(env_file)
+
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%ihd7czs1pay(u%(y@vqg8cq7x59#)4eqjj_n2r6!ue2!z^s@!'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-%ihd7czs1pay(u%(y@vqg8cq7x59#)4eqjj_n2r6!ue2!z^s@!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if ENVIRONMENT == 'development':
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -38,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'a_resume',
 ]
 
@@ -49,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For serving static files in production
 ]
 
 ROOT_URLCONF = 'a_core.urls'
@@ -74,23 +88,23 @@ WSGI_APPLICATION = 'a_core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Use SQLite for development (easy setup)
+# Use PostgreSQL for development and production
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', 'resume_analyzer_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres123'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
-# Uncomment below for PostgreSQL (production)
+# SQLite fallback for local development without Docker
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('DB_NAME', default='resume_analyzer_db'),
-#         'USER': config('DB_USER', default='your_username'),
-#         'PASSWORD': config('DB_PASSWORD', default='your_password'),
-#         'HOST': config('DB_HOST', default='localhost'),
-#         'PORT': config('DB_PORT', default='5432'),
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
 
@@ -152,3 +166,24 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Cloudinary Configuration
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME', ''),
+    api_key=os.getenv('CLOUDINARY_API_KEY', ''),
+    api_secret=os.getenv('CLOUDINARY_SECRET', ''),
+    secure=True
+)
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', ''),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY', ''),
+    'API_SECRET': os.getenv('CLOUDINARY_SECRET', ''),
+}
+
+# Use Cloudinary for media storage
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
