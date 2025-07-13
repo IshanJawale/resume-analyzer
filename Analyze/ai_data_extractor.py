@@ -33,20 +33,29 @@ class AIDataExtractor:
         try:
             prompt = f"""{resume_text}
 
-From the above text, extract the following information:
-1. Full Name
-2. Email Address
-3. Phone Number
-4. Education Details (Degree, Institution, Year)
-5. Work Experience (Job Title, Company, Duration)
-6. Skills
-7. Certifications
-8. Projects
-9. Languages Spoken
-10. Hobbies/Interests
-11. Achievements
+From the above resume text, extract the following information and return it in the exact JSON format shown below:
 
-Return the extracted information in JSON format with appropriate keys. The output should be only the JSON object without any additional text or explanation.
+{{
+  "Full Name": "string",
+  "Email Address": "string", 
+  "Phone Number": "string",
+  "Education Details": ["Degree at Institution (Year)", "Degree at Institution (Year)"],
+  "Work Experience": ["Job Title at Company (Duration)", "Job Title at Company (Duration)"],
+  "Skills": ["skill1", "skill2", "skill3"],
+  "Certifications": ["certification1", "certification2"],
+  "Projects": ["Project Name - Description", "Project Name - Description"],
+  "Languages Spoken": ["language1", "language2"],
+  "Hobbies/Interests": ["hobby1", "hobby2"],
+  "Achievements": ["achievement1", "achievement2"]
+}}
+
+Important:
+- For Projects: Include project name and brief description in each string
+- For Work Experience: Format as "Job Title at Company (Duration)" 
+- For Education: Format as "Degree at Institution (Year)"
+- For arrays, always use strings, not objects
+- If information is not found, use empty string or empty array
+- Return only the JSON object, no additional text or explanation
 """
 
             completion = self.groq_client.chat.completions.create(
@@ -66,8 +75,18 @@ Return the extracted information in JSON format with appropriate keys. The outpu
             # Parse JSON
             try:
                 raw_data = json.loads(json_output_string)
+                
+                # Log the raw AI response for debugging
+                logger.info("=== RAW AI RESPONSE ===")
+                logger.info(json.dumps(raw_data, indent=2, ensure_ascii=False))
+                
                 # Map the keys to match our database fields
                 structured_data = self._map_groq_response(raw_data)
+                
+                # Log the mapped data for debugging
+                logger.info("=== MAPPED DATA ===")
+                logger.info(json.dumps(structured_data, indent=2, ensure_ascii=False))
+                
                 return structured_data
             except json.JSONDecodeError as e:
                 logger.error(f"JSON parsing error: {e}")
@@ -102,18 +121,42 @@ Return the extracted information in JSON format with appropriate keys. The outpu
         for groq_key, db_key in mapping.items():
             if groq_key in raw_data:
                 value = raw_data[groq_key]
-                # Ensure all list fields are actual lists, not None
-                if db_key in [
+                # Fields that should preserve structure (dictionaries/objects)
+                structured_fields = [
                     "education_details",
-                    "work_experience",
+                    "work_experience", 
+                    "projects"
+                ]
+                # Fields that should be lists of strings
+                list_string_fields = [
                     "skills",
                     "certifications",
-                    "projects",
                     "languages_spoken",
                     "hobbies_interests",
                     "achievements",
-                ]:
+                ]
+                
+                if db_key in structured_fields:
+                    # Preserve structure for complex fields
                     mapped_data[db_key] = self._normalize_list_field(value)
+                elif db_key in list_string_fields:
+                    # Convert to strings for simple list fields
+                    if isinstance(value, list):
+                        normalized = []
+                        for item in value:
+                            if isinstance(item, dict):
+                                extracted_text = self._extract_meaningful_text_from_dict(item)
+                                if extracted_text:
+                                    normalized.append(extracted_text)
+                            elif isinstance(item, str) and item.strip():
+                                normalized.append(item.strip())
+                            elif item is not None:
+                                text = str(item).strip()
+                                if text:
+                                    normalized.append(text)
+                        mapped_data[db_key] = normalized
+                    else:
+                        mapped_data[db_key] = self._normalize_list_field(value)
                 else:
                     mapped_data[db_key] = str(value) if value is not None else ""
             else:
@@ -146,41 +189,74 @@ Return the extracted information in JSON format with appropriate keys. The outpu
 
     def _normalize_list_field(self, value) -> List:
         """
-        Normalize a field to ensure it's a proper list of strings
+        Normalize a field to ensure it's a proper list.
+        For structured data like projects, preserve the dictionary structure.
+        For simple data, convert to strings.
         """
         if value is None:
             return []
 
         if isinstance(value, list):
-            # Flatten any nested structures and convert to strings
             normalized = []
             for item in value:
                 if isinstance(item, dict):
-                    # If it's a dict, try to extract meaningful text
-                    if "name" in item:
-                        normalized.append(str(item["name"]))
-                    elif "title" in item:
-                        normalized.append(str(item["title"]))
-                    else:
-                        # Join all string values from the dict
-                        normalized.append(" ".join(str(v) for v in item.values() if v))
-                elif isinstance(item, str):
-                    normalized.append(item)
-                else:
-                    normalized.append(str(item))
+                    # For structured data, preserve the original dictionary
+                    # but ensure it has at least some meaningful content
+                    if any(v for v in item.values() if v):
+                        normalized.append(item)
+                elif isinstance(item, str) and item.strip():
+                    normalized.append(item.strip())
+                elif item is not None:
+                    text = str(item).strip()
+                    if text:
+                        normalized.append(text)
             return normalized
 
         if isinstance(value, dict):
-            # If it's a dict, extract all string values
-            all_values = []
-            for v in value.values():
-                if isinstance(v, list):
-                    all_values.extend(str(item) for item in v if item)
-                elif v:
-                    all_values.append(str(v))
-            return all_values
+            # If it's a single dict, wrap it in a list
+            if any(v for v in value.values() if v):
+                return [value]
+            return []
 
-        if isinstance(value, str):
-            return [value] if value else []
+        if isinstance(value, str) and value.strip():
+            return [value.strip()]
 
         return [str(value)] if value else []
+
+    def _extract_meaningful_text_from_dict(self, item_dict: dict) -> str:
+        """
+        Extract meaningful text from a dictionary object
+        """
+        # Priority fields for different types of data
+        priority_fields = [
+            "name", "title", "project_name", "project_title",
+            "job_title", "position", "role", "company", "organization",
+            "degree", "certification", "skill", "technology",
+            "description", "summary", "details"
+        ]
+        
+        # First, try to find priority fields
+        for field in priority_fields:
+            if field in item_dict and item_dict[field]:
+                value = str(item_dict[field]).strip()
+                if value:
+                    # Add additional context if available
+                    context_fields = ["company", "organization", "technologies", "duration", "year"]
+                    context = []
+                    for ctx_field in context_fields:
+                        if ctx_field in item_dict and item_dict[ctx_field] and ctx_field != field:
+                            context.append(str(item_dict[ctx_field]))
+                    
+                    if context:
+                        return f"{value} ({', '.join(context)})"
+                    return value
+        
+        # If no priority fields found, join all non-empty string values
+        all_values = []
+        for key, value in item_dict.items():
+            if value and isinstance(value, (str, int, float)):
+                text = str(value).strip()
+                if text and text.lower() not in ['none', 'null', 'undefined']:
+                    all_values.append(text)
+        
+        return " - ".join(all_values) if all_values else ""

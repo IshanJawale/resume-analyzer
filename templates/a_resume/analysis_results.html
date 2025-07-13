@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load resume_filters %}
 
 {% block title %}Analysis Results - Resume Analyzer{% endblock %}
 
@@ -287,18 +288,26 @@
                         {% if analysis.projects %}
                             {% for project in analysis.projects %}
                                 <div class="list-item">
-                                    <h6 class="fw-bold mb-1">{{ project.name|default:"Project" }}</h6>
-                                    <p class="text-muted small mb-1">{{ project.description|default:"" }}</p>
-                                    {% if project.duration %}
-                                        <small class="text-muted d-block">Duration: {{ project.duration }}</small>
-                                    {% endif %}
-                                    {% if project.technologies %}
-                                        <div class="mt-2">
-                                            {% for tech in project.technologies %}
-                                                <span class="badge bg-info badge-custom me-1">{{ tech }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                    <h6 class="fw-bold mb-1">{{ project|project_name }}</h6>
+                                    {% with desc=project|project_description %}
+                                        {% if desc %}
+                                            <p class="text-muted small mb-1">{{ desc }}</p>
+                                        {% endif %}
+                                    {% endwith %}
+                                    {% with duration=project|project_duration %}
+                                        {% if duration %}
+                                            <small class="text-muted d-block">Duration: {{ duration }}</small>
+                                        {% endif %}
+                                    {% endwith %}
+                                    {% with techs=project|project_technologies %}
+                                        {% if techs %}
+                                            <div class="mt-2">
+                                                {% for tech in techs %}
+                                                    <span class="badge bg-info badge-custom me-1">{{ tech }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
                                 </div>
                             {% endfor %}
                         {% else %}

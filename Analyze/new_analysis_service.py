@@ -5,6 +5,7 @@ This service provides complete resume analysis including text extraction,
 structured data extraction using AI, and comprehensive scoring.
 """
 
+import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -70,8 +71,12 @@ class NewResumeAnalysisService:
 
             # Step 3: Validate and normalize data to prevent type errors
             structured_data = self._validate_and_normalize_data(structured_data)
+            
+            # Log final structured data for debugging
+            logger.info("=== FINAL STRUCTURED DATA ===")
+            logger.info(json.dumps(structured_data, indent=2, ensure_ascii=False))
 
-            # Step 3: Generate analysis and recommendations
+            # Step 4: Generate analysis and recommendations
             analysis_result = self._generate_analysis(structured_data, resume_text)
 
             return {
