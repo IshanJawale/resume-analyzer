@@ -14,20 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse
 
+
 # Health check view for Render
 def health_check(request):
-    return HttpResponse('OK', status=200)
+    return HttpResponse("OK", status=200)
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('health/', health_check, name='health'),
-    path('', include('a_resume.urls')),
+    path("admin/", admin.site.urls),
+    path("health/", health_check, name="health"),
+    path("", include("a_resume.urls")),
 ]
 
 # Serve static files in development (media files handled by Cloudinary)

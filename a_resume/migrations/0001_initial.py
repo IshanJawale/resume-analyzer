@@ -16,82 +16,191 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ResumeAnalysis',
+            name="ResumeAnalysis",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('filename', models.CharField(max_length=255)),
-                ('file', models.FileField(upload_to=a_resume.models.resume_upload_path)),
-                ('resume_text', models.TextField(blank=True, null=True)),
-                ('word_count', models.IntegerField(blank=True, null=True)),
-                ('target_job_category', models.CharField(blank=True, max_length=100, null=True)),
-                ('full_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('email_address', models.EmailField(blank=True, max_length=254, null=True)),
-                ('phone_number', models.CharField(blank=True, max_length=20, null=True)),
-                ('education_details', models.JSONField(blank=True, default=list)),
-                ('work_experience', models.JSONField(blank=True, default=list)),
-                ('skills', models.JSONField(blank=True, default=list)),
-                ('certifications', models.JSONField(blank=True, default=list)),
-                ('projects', models.JSONField(blank=True, default=list)),
-                ('languages_spoken', models.JSONField(blank=True, default=list)),
-                ('hobbies_interests', models.JSONField(blank=True, default=list)),
-                ('achievements', models.JSONField(blank=True, default=list)),
-                ('overall_score', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('skill_score', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('experience_score', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('education_score', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('ats_score', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('job_match_score', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('keyword_analysis', models.JSONField(blank=True, default=dict)),
-                ('ats_analysis', models.JSONField(blank=True, default=dict)),
-                ('job_match_analysis', models.JSONField(blank=True, default=dict)),
-                ('summary', models.JSONField(blank=True, default=dict)),
-                ('strengths', models.JSONField(blank=True, default=list)),
-                ('weaknesses', models.JSONField(blank=True, default=list)),
-                ('recommendations', models.JSONField(blank=True, default=list)),
-                ('found_keywords', models.JSONField(blank=True, default=list)),
-                ('missing_keywords', models.JSONField(blank=True, default=list)),
-                ('error_message', models.TextField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), ('completed', 'Completed'), ('failed', 'Failed')], default='pending', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('analyzed_at', models.DateTimeField(blank=True, null=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='resume_analyses', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("filename", models.CharField(max_length=255)),
+                (
+                    "file",
+                    models.FileField(upload_to=a_resume.models.resume_upload_path),
+                ),
+                ("resume_text", models.TextField(blank=True, null=True)),
+                ("word_count", models.IntegerField(blank=True, null=True)),
+                (
+                    "target_job_category",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                ("full_name", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "email_address",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
+                (
+                    "phone_number",
+                    models.CharField(blank=True, max_length=20, null=True),
+                ),
+                ("education_details", models.JSONField(blank=True, default=list)),
+                ("work_experience", models.JSONField(blank=True, default=list)),
+                ("skills", models.JSONField(blank=True, default=list)),
+                ("certifications", models.JSONField(blank=True, default=list)),
+                ("projects", models.JSONField(blank=True, default=list)),
+                ("languages_spoken", models.JSONField(blank=True, default=list)),
+                ("hobbies_interests", models.JSONField(blank=True, default=list)),
+                ("achievements", models.JSONField(blank=True, default=list)),
+                (
+                    "overall_score",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "skill_score",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "experience_score",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "education_score",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "ats_score",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "job_match_score",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                ("keyword_analysis", models.JSONField(blank=True, default=dict)),
+                ("ats_analysis", models.JSONField(blank=True, default=dict)),
+                ("job_match_analysis", models.JSONField(blank=True, default=dict)),
+                ("summary", models.JSONField(blank=True, default=dict)),
+                ("strengths", models.JSONField(blank=True, default=list)),
+                ("weaknesses", models.JSONField(blank=True, default=list)),
+                ("recommendations", models.JSONField(blank=True, default=list)),
+                ("found_keywords", models.JSONField(blank=True, default=list)),
+                ("missing_keywords", models.JSONField(blank=True, default=list)),
+                ("error_message", models.TextField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("processing", "Processing"),
+                            ("completed", "Completed"),
+                            ("failed", "Failed"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("analyzed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="resume_analyses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Resume Analysis',
-                'verbose_name_plural': 'Resume Analyses',
-                'ordering': ['-created_at'],
+                "verbose_name": "Resume Analysis",
+                "verbose_name_plural": "Resume Analyses",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='AnalysisRecommendation',
+            name="AnalysisRecommendation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField()),
-                ('priority', models.CharField(choices=[('critical', 'Critical'), ('high', 'High'), ('medium', 'Medium'), ('low', 'Low')], max_length=20)),
-                ('category', models.CharField(max_length=100)),
-                ('action_items', models.JSONField(blank=True, default=list)),
-                ('analysis', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='detailed_recommendations', to='a_resume.resumeanalysis')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField()),
+                (
+                    "priority",
+                    models.CharField(
+                        choices=[
+                            ("critical", "Critical"),
+                            ("high", "High"),
+                            ("medium", "Medium"),
+                            ("low", "Low"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("category", models.CharField(max_length=100)),
+                ("action_items", models.JSONField(blank=True, default=list)),
+                (
+                    "analysis",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="detailed_recommendations",
+                        to="a_resume.resumeanalysis",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['priority', 'title'],
+                "ordering": ["priority", "title"],
             },
         ),
         migrations.CreateModel(
-            name='UserProfile',
+            name="UserProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('phone_number', models.CharField(blank=True, max_length=20)),
-                ('linkedin_url', models.URLField(blank=True)),
-                ('github_url', models.URLField(blank=True)),
-                ('website_url', models.URLField(blank=True)),
-                ('email_notifications', models.BooleanField(default=True)),
-                ('marketing_emails', models.BooleanField(default=False)),
-                ('total_analyses', models.IntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("phone_number", models.CharField(blank=True, max_length=20)),
+                ("linkedin_url", models.URLField(blank=True)),
+                ("github_url", models.URLField(blank=True)),
+                ("website_url", models.URLField(blank=True)),
+                ("email_notifications", models.BooleanField(default=True)),
+                ("marketing_emails", models.BooleanField(default=False)),
+                ("total_analyses", models.IntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]
