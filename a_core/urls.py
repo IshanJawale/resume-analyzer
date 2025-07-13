@@ -18,9 +18,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse
+
+# Health check view for Render
+def health_check(request):
+    return HttpResponse('OK', status=200)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('health/', health_check, name='health'),
     path('', include('a_resume.urls')),
 ]
 
