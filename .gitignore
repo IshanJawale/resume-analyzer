@@ -186,8 +186,8 @@ yarn-error.log*
 # Project specific
 media/uploads/
 media/resumes/
-static/admin/
-staticfiles/
+# static/admin/
+# staticfiles/
 .env.local
 .env.development
 .env.production
