@@ -219,8 +219,9 @@ STORAGES = {
     },
 }
 
-# Fallback for older Django versions
+# Fallback for older Django versions and cloudinary-storage compatibility
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
