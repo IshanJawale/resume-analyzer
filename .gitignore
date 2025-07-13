@@ -73,8 +73,8 @@ media/
 uploads/
 
 # Static files collected for production
-staticfiles/
-static_collected/
+# staticfiles/
+# static_collected/
 
 # Test files
 test_*.py
