@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% block title %}Profile - Resume Analyzer{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Profile Card -->
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <img src="https://via.placeholder.com/120x120/3498db/ffffff?text={{ user.username|first|upper }}" 
+                                 alt="Profile Picture" 
+                                 class="rounded-circle mb-3"
+                                 width="120" height="120">
+                        </div>
+                        <h4 class="fw-bold">{{ user.get_full_name|default:user.username }}</h4>
+                        <p class="text-muted">{{ user.email }}</p>
+                        <p class="text-muted">
+                            <i class="fas fa-calendar"></i> 
+                            Member since {{ user.date_joined|date:"F Y" }}
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Stats Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar"></i> Your Stats
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h3 class="fw-bold text-primary">{{ total_analyses|default:0 }}</h3>
+                                <small class="text-muted">Analyses</small>
+                            </div>
+                            <div class="col-6">
+                                <h3 class="fw-bold text-success">{{ avg_score|default:0 }}%</h3>
+                                <small class="text-muted">Avg Score</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <!-- Profile Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user"></i> Profile Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="first_name" class="form-label">First Name</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="first_name" 
+                                               name="first_name" 
+                                               value="{{ user.first_name }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="last_name" class="form-label">Last Name</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="last_name" 
+                                               name="last_name" 
+                                               value="{{ user.last_name }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email" 
+                                       name="email" 
+                                       value="{{ user.email }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="username" 
+                                       name="username" 
+                                       value="{{ user.username }}">
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Change Password -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lock"></i> Change Password
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'change_password' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="old_password" class="form-label">Current Password</label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="old_password" 
+                                       name="old_password" 
+                                       required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="new_password1" class="form-label">New Password</label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="new_password1" 
+                                       name="new_password1" 
+                                       required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="new_password2" class="form-label">Confirm New Password</label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="new_password2" 
+                                       name="new_password2" 
+                                       required>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Account Settings -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog"></i> Account Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                    <label class="form-check-label" for="emailNotifications">
+                                        Email Notifications
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="marketingEmails">
+                                    <label class="form-check-label" for="marketingEmails">
+                                        Marketing Emails
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-danger">
+                                    <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                                </h6>
+                                <p class="text-muted small">
+                                    Once you delete your account, there is no going back. Please be certain.
+                                </p>
+                                <button class="btn btn-outline-danger" onclick="confirmDelete()">
+                                    <i class="fas fa-trash"></i> Delete Account
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-info">
+                                    <i class="fas fa-download"></i> Data Export
+                                </h6>
+                                <p class="text-muted small">
+                                    Download all your data including analysis history and reports.
+                                </p>
+                                <button class="btn btn-outline-info">
+                                    <i class="fas fa-download"></i> Export Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+    function confirmDelete() {
+        if (confirm('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.')) {
+            if (confirm('This is your final warning. Are you absolutely sure you want to delete your account?')) {
+                // Implement account deletion
+                console.log('Account deletion confirmed');
+                // You would typically make an AJAX request or redirect to a delete endpoint
+            }
+        }
+    }
+    
+    // Password strength validation
+    const newPassword1 = document.getElementById('new_password1');
+    const newPassword2 = document.getElementById('new_password2');
+    
+    function validatePasswordMatch() {
+        if (newPassword2.value !== newPassword1.value) {
+            newPassword2.setCustomValidity('Passwords do not match');
+        } else {
+            newPassword2.setCustomValidity('');
+        }
+    }
+    
+    newPassword1.addEventListener('input', validatePasswordMatch);
+    newPassword2.addEventListener('input', validatePasswordMatch);
+</script>
+{% endblock %}
+{% endblock %}

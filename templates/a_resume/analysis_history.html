@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% block title %}Analysis History - Resume Analyzer{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="fw-bold">Analysis History</h1>
+                        <p class="text-muted">View and compare your previous resume analyses</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> New Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filter and Search -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form method="get" id="searchForm">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Search by filename..." 
+                               name="search" value="{{ search_query }}" id="searchInput">
+                        <input type="hidden" name="sort" value="{{ sort_by }}">
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-2">
+                    <form method="get" id="sortForm">
+                        <input type="hidden" name="search" value="{{ search_query }}">
+                        <select class="form-select" name="sort" id="sortSelect" onchange="this.form.submit()">
+                            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                            <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+                            <option value="highest" {% if sort_by == 'highest' %}selected{% endif %}>Highest Score</option>
+                            <option value="lowest" {% if sort_by == 'lowest' %}selected{% endif %}>Lowest Score</option>
+                        </select>
+                    </form>
+                    <button class="btn btn-outline-secondary" id="viewToggle">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analysis List -->
+        <div class="row" id="analysisList">
+            {% for analysis in page_obj %}
+                <div class="col-lg-6 mb-4 analysis-item" 
+                     data-filename="{{ analysis.filename }}" 
+                     data-date="{{ analysis.created_at|date:'Y-m-d' }}" 
+                     data-score="{{ analysis.overall_score|floatformat:0|default:0 }}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-1">{{ analysis.filename }}</h5>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> {{ analysis.created_at|date:"F d, Y" }}
+                                    </small>
+                                </div>
+                                <div class="score-circle score-{% if analysis.overall_score >= 80 %}excellent{% elif analysis.overall_score >= 60 %}good{% elif analysis.overall_score >= 40 %}average{% else %}poor{% endif %}" 
+                                     style="width: 60px; height: 60px; font-size: 1rem;">
+                                    {{ analysis.overall_score|floatformat:0|default:0 }}%
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="row text-center">
+                                    <div class="col-3">
+                                        <small class="text-muted">Skills</small>
+                                        <div class="fw-bold">{{ analysis.skill_score|floatformat:0|default:0 }}%</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted">Experience</small>
+                                        <div class="fw-bold">{{ analysis.experience_score|floatformat:0|default:0 }}%</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted">Education</small>
+                                        <div class="fw-bold">{{ analysis.education_score|floatformat:0|default:0 }}%</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted">Contact</small>
+                                        <div class="fw-bold">{{ analysis.ats_score|floatformat:0|default:0 }}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'analysis_results' analysis.id %}" class="btn btn-primary btn-sm flex-fill">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                <button class="btn btn-outline-secondary btn-sm download-btn" data-analysis-id="{{ analysis.id }}">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <form method="post" action="{% url 'delete_analysis' analysis.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this analysis?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <!-- Empty state when no analyses exist -->
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox text-muted mb-3" style="font-size: 4rem;"></i>
+                        <h3 class="text-muted">No analyses found</h3>
+                        <p class="text-muted">You haven't analyzed any resumes yet. Upload your first resume to get started!</p>
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Upload Resume
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="Analysis history pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Previous</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                        {% endif %}
+                        
+                        {% for page_num in page_obj.paginator.page_range %}
+                            {% if page_num == page_obj.number %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% elif page_num > page_obj.number|add:'-3' and page_num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_num }}&search={{ search_query }}&sort={{ sort_by }}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Next</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+    // Search functionality - submit form on input
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        // Debounce the search
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            document.getElementById('searchForm').submit();
+        }, 500);
+    });
+    
+    // View toggle (list/grid)
+    let isGridView = true;
+    document.getElementById('viewToggle').addEventListener('click', function() {
+        const items = document.querySelectorAll('.analysis-item');
+        const icon = this.querySelector('i');
+        
+        if (isGridView) {
+            // Switch to list view
+            items.forEach(item => {
+                item.className = 'col-12 mb-3 analysis-item';
+            });
+            icon.className = 'fas fa-th';
+            isGridView = false;
+        } else {
+            // Switch to grid view
+            items.forEach(item => {
+                item.className = 'col-lg-6 mb-4 analysis-item';
+            });
+            icon.className = 'fas fa-list';
+            isGridView = true;
+        }
+    });
+    
+    // Download report function - using event delegation
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.download-btn')) {
+            const button = e.target.closest('.download-btn');
+            const analysisId = button.getAttribute('data-analysis-id');
+            downloadReport(analysisId);
+        }
+    });
+    
+    // Download report function
+    function downloadReport(analysisId) {
+        // Create a temporary link to download the analysis as a text report
+        fetch(`/analysis/${analysisId}/`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/html',
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Create a simple text report from the analysis data
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract basic info for a simple text report
+            const filename = doc.querySelector('h1')?.textContent || 'Analysis Report';
+            const score = doc.querySelector('.score-circle')?.textContent || 'N/A';
+            
+            let reportText = `Resume Analysis Report\n`;
+            reportText += `========================\n\n`;
+            reportText += `File: ${filename}\n`;
+            reportText += `Overall Score: ${score}\n`;
+            reportText += `Generated: ${new Date().toLocaleDateString()}\n\n`;
+            reportText += `View full report at: ${window.location.origin}/analysis/${analysisId}/\n`;
+            
+            // Create and download the file
+            const blob = new Blob([reportText], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `analysis-report-${analysisId}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Error generating report:', error);
+            alert('Error generating download report. Please try again.');
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

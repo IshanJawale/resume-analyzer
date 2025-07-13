@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}Home - Resume Analyzer{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Analyze Your Resume with AI
+                </h1>
+                <p class="lead mb-4">
+                    Get instant feedback on your resume with our AI-powered analyzer. 
+                    Improve your chances of landing your dream job with detailed insights and recommendations.
+                </p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg me-md-2">
+                            <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-md-2">
+                            <i class="fas fa-rocket"></i> Get Started Free
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-file-alt" style="font-size: 15rem; opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="fw-bold">Why Choose Our Resume Analyzer?</h2>
+                <p class="lead text-muted">Discover the powerful features that make our tool stand out</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-brain text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">AI-Powered Analysis</h5>
+                        <p class="card-text">Advanced machine learning algorithms analyze your resume against industry standards and job requirements.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line text-success mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Detailed Scoring</h5>
+                        <p class="card-text">Get comprehensive scores on various aspects of your resume including formatting, keywords, and content quality.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-lightbulb text-warning mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Actionable Insights</h5>
+                        <p class="card-text">Receive specific recommendations and suggestions to improve your resume's effectiveness.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-clock text-info mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Instant Results</h5>
+                        <p class="card-text">Get your resume analysis results in seconds, not hours. Perfect for quick iterations and improvements.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt text-secondary mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Secure & Private</h5>
+                        <p class="card-text">Your resume data is encrypted and secure. We prioritize your privacy and never share your information.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-mobile-alt text-dark mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Mobile Friendly</h5>
+                        <p class="card-text">Access your resume analyzer from any device. Our responsive design works perfectly on all screen sizes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="fw-bold">How It Works</h2>
+                <p class="lead text-muted">Simple steps to analyze your resume</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="mb-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h3 class="mb-0">1</h3>
+                    </div>
+                </div>
+                <h5>Upload Resume</h5>
+                <p class="text-muted">Upload your resume in PDF format. Our system supports various resume formats and layouts.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="mb-4">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h3 class="mb-0">2</h3>
+                    </div>
+                </div>
+                <h5>AI Analysis</h5>
+                <p class="text-muted">Our AI analyzes your resume for content, formatting, keywords, and overall effectiveness.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="mb-4">
+                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h3 class="mb-0">3</h3>
+                    </div>
+                </div>
+                <h5>Get Results</h5>
+                <p class="text-muted">Receive detailed analysis with scores, recommendations, and actionable insights to improve your resume.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold mb-4">Ready to Improve Your Resume?</h2>
+                <p class="lead mb-4">Join thousands of job seekers who have improved their resumes with our AI-powered analyzer.</p>
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket"></i> Start Analyzing Now
+                    </a>
+                {% else %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

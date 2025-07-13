@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar bg-light">
+            <div class="d-flex flex-column p-3">
+                <h5 class="mb-3">
+                    <i class="fas fa-user-circle"></i> {{ user.username }}
+                </h5>
+                
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'analysis_history' %}" class="nav-link {% if request.resolver_match.url_name == 'analysis_history' %}active{% endif %}">
+                            <i class="fas fa-history"></i> History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-book"></i> Resources
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-question-circle"></i> Help
+                        </a>
+                    </li>
+                </ul>
+                
+                <hr>
+                
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" 
+                       id="dropdownUser1" data-bs-toggle="dropdown">
+                        <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                        <strong>{{ user.username }}</strong>
+                    </a>
+                    <ul class="dropdown-menu text-small shadow">
+                        <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            {% block main_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sidebar {
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        border-right: 1px solid #dee2e6;
+    }
+    
+    .main-content {
+        padding: 0;
+    }
+    
+    .nav-link {
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-link:hover {
+        background-color: #e9ecef;
+        color: #495057;
+    }
+    
+    .nav-link.active {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+    
+    .nav-link i {
+        width: 20px;
+        text-align: center;
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}

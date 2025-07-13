@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Processing Analysis - Resume Analyzer{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center p-5">
+                        <div class="mb-4">
+                            <i class="fas fa-cog fa-spin text-primary" style="font-size: 4rem;"></i>
+                        </div>
+                        <h2 class="fw-bold mb-3">Analyzing Your Resume</h2>
+                        <p class="text-muted mb-4">
+                            Our AI is carefully analyzing your resume. This usually takes 30-60 seconds.
+                        </p>
+                        
+                        <div class="progress mb-4">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" 
+                                 style="width: 100%">
+                                Processing...
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="text-muted">What we're analyzing:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Content quality and relevance</li>
+                                <li><i class="fas fa-check text-success"></i> Formatting and structure</li>
+                                <li><i class="fas fa-check text-success"></i> Keywords and ATS optimization</li>
+                                <li><i class="fas fa-check text-success"></i> Experience and achievements</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Please wait</strong> - this page will automatically refresh when analysis is complete.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Auto-refresh page every 5 seconds to check if analysis is complete
+    setTimeout(function() {
+        window.location.reload();
+    }, 5000);
+</script>
+{% endblock %}
