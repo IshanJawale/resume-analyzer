@@ -166,9 +166,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+
+# Only add STATICFILES_DIRS if the directory exists
+static_dir = BASE_DIR / "static"
+if static_dir.exists():
+    STATICFILES_DIRS = [static_dir]
+else:
+    STATICFILES_DIRS = []
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Media files - Using Cloudinary for file storage, no local media needed
@@ -249,3 +254,46 @@ if "RENDER" in os.environ:
 
 # Health check endpoint (required by Render)
 HEALTH_CHECK_ENDPOINT = "/health/"
+
+# Logging Configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO" if not DEBUG else "DEBUG",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "a_resume": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "Analyze": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

@@ -163,9 +163,7 @@ Return the extracted information in JSON format with appropriate keys. The outpu
                         normalized.append(str(item["title"]))
                     else:
                         # Join all string values from the dict
-                        normalized.append(
-                            " ".join(str(v) for v in item.values() if v)
-                        )
+                        normalized.append(" ".join(str(v) for v in item.values() if v))
                 elif isinstance(item, str):
                     normalized.append(item)
                 else:

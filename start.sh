@@ -19,6 +19,6 @@ else:
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Start Django development server
-echo "Starting Django development server..."
-exec python manage.py runserver 0.0.0.0:8000
+# Start Gunicorn for production
+echo "Starting Gunicorn server..."
+exec gunicorn a_core.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120

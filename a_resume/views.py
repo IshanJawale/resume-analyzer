@@ -597,7 +597,7 @@ def perform_ai_analysis(resume_analysis):
                             if isinstance(skills_data, list)
                             else [skills_data]
                         )
-                except:
+                except (json.JSONDecodeError, ValueError, TypeError):
                     # If parsing fails, treat as single skill or split by commas
                     resume_analysis.skills = [skills_data] if skills_data else []
             else:

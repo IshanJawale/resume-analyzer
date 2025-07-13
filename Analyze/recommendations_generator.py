@@ -113,7 +113,9 @@ class RecommendationsGenerator:
             )
 
         # Check for trending skills
-        current_skills_lower = [skill.lower() for skill in skills if isinstance(skill, str)]
+        current_skills_lower = [
+            skill.lower() for skill in skills if isinstance(skill, str)
+        ]
         missing_trending = []
 
         for category, trending in self.trending_skills.items():
@@ -136,7 +138,10 @@ class RecommendationsGenerator:
             "problem solving",
             "project management",
         ]
-        has_soft_skills = any(soft in " ".join(str(skill) for skill in skills if skill).lower() for soft in soft_skills)
+        has_soft_skills = any(
+            soft in " ".join(str(skill) for skill in skills if skill).lower()
+            for soft in soft_skills
+        )
 
         if not has_soft_skills:
             recommendations.append(

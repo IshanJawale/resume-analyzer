@@ -24,7 +24,16 @@ from django.urls import include, path
 
 # Health check view for Render
 def health_check(request):
-    return HttpResponse("OK", status=200)
+    try:
+        # Test database connection
+        from django.db import connection
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+
+        return HttpResponse("OK", status=200)
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}", status=500)
 
 
 urlpatterns = [

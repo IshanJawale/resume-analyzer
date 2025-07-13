@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: resume-analyzer
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "./start.sh"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.4"
+      - key: ENVIRONMENT
+        value: "production"
+      - key: DEBUG
+        value: "False"
+    autoDeploy: false

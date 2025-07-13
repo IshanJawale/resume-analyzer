@@ -182,18 +182,22 @@ class NewResumeAnalysisService:
                     "total_recommendations": len(recommendations),
                     "total_skills": len(structured_data.get("skills", [])),
                     "total_experience": len(structured_data.get("work_experience", [])),
-                    "total_education": len(structured_data.get("education_details", [])),
+                    "total_education": len(
+                        structured_data.get("education_details", [])
+                    ),
                     "has_contact_info": bool(
                         structured_data.get("email_address")
                         and structured_data.get("phone_number")
                     ),
                 },
                 "strengths": self._identify_strengths(structured_data, score_breakdown),
-                "weaknesses": self._identify_weaknesses(structured_data, score_breakdown),
+                "weaknesses": self._identify_weaknesses(
+                    structured_data, score_breakdown
+                ),
             }
 
             return analysis
-            
+
         except Exception as e:
             logger.error(f"Error generating analysis: {e}")
             # Return a safe fallback analysis
@@ -281,39 +285,3 @@ class NewResumeAnalysisService:
             weaknesses.append("No achievements highlighted")
 
         return weaknesses[:5]  # Limit to top 5 weaknesses
-
-
-# Test function
-def test_new_service():
-    """Test the new analysis service"""
-    service = NewResumeAnalysisService()
-
-    # Test with resume.pdf in parent directory
-    result = service.extract_and_analyze_resume("resume.pdf")
-
-    print("=== NEW RESUME ANALYSIS SERVICE TEST ===")
-    print(f"Success: {result['success']}")
-
-    if result["success"]:
-        print(f"Word count: {result['word_count']}")
-        print(f"Overall score: {result['analysis']['scores']['overall_score']}")
-
-        print("\n=== EXTRACTED DATA ===")
-        data = result["extracted_data"]
-        print(f"Name: {data.get('full_name', 'N/A')}")
-        print(f"Email: {data.get('email_address', 'N/A')}")
-        print(f"Phone: {data.get('phone_number', 'N/A')}")
-        print(f"Skills: {len(data.get('skills', []))} skills")
-        print(f"Experience: {len(data.get('work_experience', []))} entries")
-        print(f"Projects: {len(data.get('projects', []))} projects")
-
-        print("\n=== RECOMMENDATIONS ===")
-        for i, rec in enumerate(result["analysis"]["recommendations"][:3], 1):
-            print(f"{i}. {rec['title']} ({rec['priority']})")
-            print(f"   {rec['description']}")
-    else:
-        print(f"Error: {result['error']}")
-
-
-if __name__ == "__main__":
-    test_new_service()
