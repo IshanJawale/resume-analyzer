@@ -14,6 +14,7 @@ COPY . .
 
 # Create staticfiles directory and copy startup script
 RUN mkdir -p /app/staticfiles
+RUN mkdir -p /app/static
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
