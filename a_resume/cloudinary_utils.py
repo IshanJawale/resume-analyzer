@@ -37,7 +37,7 @@ def upload_resume_to_cloudinary(file, user_id, filename):
 
         return result
     except Exception as e:
-        raise Exception(f"Failed to upload to Cloudinary: {str(e)}")
+        raise Exception("Failed to upload to Cloudinary") from e  # nosec B608
 
 
 def delete_resume_from_cloudinary(public_id):
@@ -54,7 +54,7 @@ def delete_resume_from_cloudinary(public_id):
         result = cloudinary.uploader.destroy(public_id)
         return result
     except Exception as e:
-        raise Exception(f"Failed to delete from Cloudinary: {str(e)}")
+        raise Exception("Failed to delete from Cloudinary") from e  # nosec B608
 
 
 def get_cloudinary_url(public_id, transformation=None):
@@ -74,4 +74,4 @@ def get_cloudinary_url(public_id, transformation=None):
         else:
             return cloudinary.CloudinaryImage(public_id).build_url()
     except Exception as e:
-        raise Exception(f"Failed to generate Cloudinary URL: {str(e)}")
+        raise Exception("Failed to generate Cloudinary URL") from e  # nosec B608
