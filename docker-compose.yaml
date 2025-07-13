@@ -1,0 +1,42 @@
+name: resume-analyzer
+
+services:
+  app:
+    image: resume-analyzer-image
+    build: .
+    container_name: resume-analyzer-container
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - media_files:/app/media
+      - static_files:/app/staticfiles
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=resume_analyzer_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:15
+    container_name: resume-analyzer-db
+    environment:
+      - POSTGRES_DB=resume_analyzer_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  media_files:
+  static_files:
