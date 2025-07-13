@@ -382,7 +382,7 @@ def analysis_results(request, analysis_id):
         "summary": formatted_analysis.summary,
     }
 
-    return render(request, "a_resume/new_analysis_results.html", context)
+    return render(request, "a_resume/analysis_results.html", context)
 
 
 @login_required
@@ -540,7 +540,9 @@ def perform_ai_analysis(resume_analysis):
             print(f"🔍 Analysis service returned:")
             print(f"   - Success: {result['success']}")
             print(f"   - Resume text length: {len(result.get('resume_text', ''))}")
-            print(f"   - Extracted data keys: {list(result.get('extracted_data', {}).keys())}")
+            print(
+                f"   - Extracted data keys: {list(result.get('extracted_data', {}).keys())}"
+            )
             print(f"   - Analysis keys: {list(result.get('analysis', {}).keys())}")
 
             # Update resume analysis with extracted data
@@ -613,7 +615,7 @@ def perform_ai_analysis(resume_analysis):
 
             # Store analysis results
             analysis = result["analysis"]
-            
+
             # Debug: Check what analysis data we have
             print(f"🔍 Analysis data structure:")
             if "scores" in analysis:
@@ -651,41 +653,43 @@ def perform_ai_analysis(resume_analysis):
                     "total_education": len(resume_analysis.education_details),
                     "has_contact_info": bool(resume_analysis.email_address),
                 }
-            
+
             resume_analysis.summary = summary_data
             print(f"   - Summary: {summary_data}")
-            
+
             strengths_data = analysis.get("strengths") or []
             if not strengths_data:
                 print("   ⚠️  No strengths data, creating defaults")
                 strengths_data = [
                     "Resume successfully processed",
                     "Clear structure and formatting",
-                    "Relevant content identified"
+                    "Relevant content identified",
                 ]
             resume_analysis.strengths = strengths_data
             print(f"   - Strengths: {len(strengths_data)} items")
-            
+
             weaknesses_data = analysis.get("weaknesses") or []
             if not weaknesses_data:
                 print("   ⚠️  No weaknesses data, creating defaults")
                 weaknesses_data = [
                     "Consider adding more quantified achievements",
-                    "Could benefit from keyword optimization"
+                    "Could benefit from keyword optimization",
                 ]
             resume_analysis.weaknesses = weaknesses_data
             print(f"   - Weaknesses: {len(weaknesses_data)} items")
-            
+
             recommendations_data = analysis.get("recommendations") or []
             resume_analysis.recommendations = recommendations_data
             print(f"   - Recommendations: {len(recommendations_data)} items")
 
             resume_analysis.save()
-            
+
             # Debug: Final check of saved data
             print(f"🎯 Final saved data:")
             print(f"   - Overall score: {resume_analysis.overall_score}")
-            print(f"   - Summary keys: {list(resume_analysis.summary.keys()) if resume_analysis.summary else 'None'}")
+            print(
+                f"   - Summary keys: {list(resume_analysis.summary.keys()) if resume_analysis.summary else 'None'}"
+            )
             print(f"   - Strengths count: {len(resume_analysis.strengths)}")
             print(f"   - Weaknesses count: {len(resume_analysis.weaknesses)}")
             print(f"   - Skills count: {len(resume_analysis.skills)}")
